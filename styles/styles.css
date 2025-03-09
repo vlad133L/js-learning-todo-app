@@ -8,9 +8,6 @@ body {
   font-family: "Kanit", sans-serif;
   box-sizing: border-box;
 }
-.container {
-  transition: background-color color 0.2s ease;
-}
 .container.dark {
   background-color: #252525;
   color: var(--white);
@@ -52,7 +49,7 @@ body {
   transition: background-color 0.2s ease-in;
 }
 .theme-toggle:hover {
-  background-color: #5850dd;
+  background-color: var(--primary-color);
 }
 .search-input {
   width: 100%;
@@ -95,7 +92,7 @@ body {
   transition: all 0.2s ease-in;
 }
 .add-button:hover {
-  background-color: #534cc2;
+  background-color: var(--primary-color);
 }
 .modal {
   position: fixed;
@@ -115,6 +112,7 @@ body {
   padding: 18px 30px;
 }
 .modal__main.dark {
+  color: var(--white);
   background-color: rgba(37, 37, 37, 1);
   border: 1px solid var(--white);
 }
@@ -123,9 +121,6 @@ body {
   font-size: 24px;
   margin-bottom: 25px;
   text-align: center;
-}
-.modal__title.dark {
-  color: var(--white);
 }
 
 .modal__input {
@@ -165,4 +160,108 @@ body {
 }
 .modal__buttons-apply:hover {
   background-color: rgb(64, 57, 173);
+}
+.tasks-section__list {
+  display: none;
+}
+.tasks-section__list-item {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  font-size: 20px;
+  text-transform: uppercase;
+}
+.tasks-section__list-item:not(:last-child) {
+  border-bottom: 1px solid var(--primary-color);
+}
+.tasks-section__list-item input {
+  margin-right: 17px;
+}
+.list__item-buttons {
+  margin-left: auto;
+}
+
+.list__item-input {
+  padding: 20px;
+}
+
+.real-checkbox {
+  top: 0;
+  position: absolute;
+  height: 0;
+  opacity: 0;
+  z-index: -1;
+}
+
+.custom-checkbox {
+  position: relative;
+  display: inline-block;
+  width: 26px;
+  height: 26px;
+  border-radius: 2px;
+  margin-right: 17px;
+  border: 1px solid var(--primary-color);
+  vertical-align: sub;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.custom-checkbox::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background: url("./../assets/icons/check-mark-icon.svg") no-repeat center;
+  background-size: contain;
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.real-checkbox:checked + .custom-checkbox {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.real-checkbox:checked + .custom-checkbox::before {
+  opacity: 1;
+}
+
+.real-checkbox:checked ~ .list__item-text {
+  text-decoration: line-through;
+  color: rgba(37, 37, 37, 0.5);
+}
+
+.container.dark .real-checkbox:checked ~ .list__item-text {
+  color: rgba(255, 255, 255, 0.5);
+}
+@keyframes changeFill {
+  from {
+    fill: #cdcdcd;
+  }
+  to {
+    fill: var(--primary-color);
+  }
+}
+
+@keyframes changeStroke {
+  from {
+    stroke: #cdcdcd;
+  }
+  to {
+    stroke: red;
+  }
+}
+.tasks-section__list-item:has(.real-checkbox:checked) .list__item-buttons {
+  display: none;
+}
+.edit-button:hover svg {
+  animation: changeFill 0.2s ease-in forwards;
+}
+
+.delete-button:hover svg path {
+  animation: changeStroke 0.2s ease-in forwards;
 }

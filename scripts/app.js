@@ -7,6 +7,10 @@ const modalCloseButton = document.querySelector(".modal__buttons-cancel");
 const modalApplyButton = document.querySelector(".modal__buttons-apply");
 const modal = document.querySelector(".modal");
 const searchInput = document.querySelector(".search-input");
+const tasksList = document.createElement("ul");
+const tasksSection = document.querySelector(".tasks-section");
+tasksSection.appendChild(tasksList);
+tasksList.classList.add("tasks-section__list");
 
 const themes = {
   light: {
@@ -24,7 +28,13 @@ const themes = {
           </svg>`,
   },
 };
+const updateTasksView = () => {
+  const isEmpty = tasksList.children.length === 0;
+  emptyImage.style.display = isEmpty ? "block" : "none";
+  emptyText.style.display = isEmpty ? "block" : "none";
 
+  tasksList.style.display = isEmpty ? "none" : "block";
+};
 const updateTheme = () => {
   const isDarkMode = container.classList.contains("dark");
   const theme = isDarkMode ? themes.dark : themes.light;
@@ -41,6 +51,13 @@ themeToggleButton.addEventListener("click", () => {
 });
 
 addButton.addEventListener("click", () => {
+  const isDarkMode = container.classList.contains("dark");
+  if (isDarkMode) {
+    const modalInput = document.querySelector(".modal__input");
+    const modalMain = document.querySelector(".modal__main");
+    modalMain.classList.toggle("dark");
+    modalInput.classList.toggle("dark");
+  }
   modal.style.display = "block";
   container.classList.add("modal-open");
 });
@@ -48,4 +65,78 @@ addButton.addEventListener("click", () => {
 modalCloseButton.addEventListener("click", () => {
   modal.style.display = "none";
   container.classList.remove("modal-open");
+});
+
+modalApplyButton.addEventListener("click", () => {
+  const modalTaskInput = document.querySelector(".modal__input");
+  const taskText = modalTaskInput.value.trim();
+  if (!taskText) {
+    return;
+  }
+  const listItem = document.createElement("li");
+  listItem.innerHTML = `<label>
+  <input type="checkbox" class="real-checkbox">
+  <span class="custom-checkbox"></span>
+  <span class="list__item-text">${taskText}</span>
+</label>
+<div class="list__item-buttons">
+  <button class="edit-button">
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 15 15"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M7.67272 3.99106L1 10.6637V14H4.33636L11.0091 7.32736M7.67272 3.99106L10.0654 1.59837L10.0669 1.59695C10.3962 1.26759 10.5612 1.10261 10.7514 1.04082C10.9189 0.986392 11.0993 0.986392 11.2669 1.04082C11.4569 1.10257 11.6217 1.26735 11.9506 1.59625L13.4018 3.04738C13.7321 3.37769 13.8973 3.54292 13.9592 3.73337C14.0136 3.90088 14.0136 4.08133 13.9592 4.24885C13.8974 4.43916 13.7324 4.60414 13.4025 4.93398L13.4018 4.93468L11.0091 7.32736M7.67272 3.99106L11.0091 7.32736"
+        stroke="#CDCDCD"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </button>
+  <button class="delete-button">
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M3.87414 7.61505C3.80712 6.74386 4.49595 6 5.36971 6H12.63C13.5039 6 14.1927 6.74385 14.1257 7.61505L13.6064 14.365C13.5463 15.1465 12.8946 15.75 12.1108 15.75H5.88894C5.10514 15.75 4.45348 15.1465 4.39336 14.365L3.87414 7.61505Z"
+        stroke="#CDCDCD"
+      />
+      <path d="M14.625 3.75H3.375" stroke="#CDCDCD" stroke-linecap="round" />
+      <path
+        d="M7.5 2.25C7.5 1.83579 7.83577 1.5 8.25 1.5H9.75C10.1642 1.5 10.5 1.83579 10.5 2.25V3.75H7.5V2.25Z"
+        stroke="#CDCDCD"
+      />
+      <path d="M10.5 9V12.75" stroke="#CDCDCD" stroke-linecap="round" />
+      <path d="M7.5 9V12.75" stroke="#CDCDCD" stroke-linecap="round" />
+    </svg>
+  </button>
+</div>`;
+  listItem.classList.add("tasks-section__list-item");
+  tasksList.appendChild(listItem);
+  modal.style.display = "none";
+  container.classList.remove("modal-open");
+  modalTaskInput.value = "";
+  updateTasksView();
+});
+
+searchInput.addEventListener("input", (e) => {
+  const searchInputValue = e.target.value.trim().toLowerCase(); // Приводим к нижнему регистру
+
+  Array.from(tasksList.children).forEach((task) => {
+    const taskText = task
+      .querySelector(".list__item-text")
+      .textContent.toLowerCase(); // Получаем текст задачи
+    if (taskText.startsWith(searchInputValue)) {
+      task.style.display = "flex"; // Показываем задачу
+    } else {
+      task.style.display = "none"; // Скрываем задачу
+    }
+  });
 });
