@@ -1,20 +1,24 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 :root {
   --primary-color: #6c63ff;
-  --white: #ffffff;
+  --white: #f7f7f7;
 }
 
 body {
   font-family: "Kanit", sans-serif;
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
-body.dark {
-  background-color: black;
-  color: white;
-}
 .container {
+  transition: background-color color 0.2s ease;
+}
+.container.dark {
+  background-color: #252525;
+  color: var(--white);
+}
+.container.modal-open {
+  background-color: #252525b2;
+}
+.wrapper {
   position: relative;
   max-width: 750px;
   margin: 0 auto;
@@ -45,16 +49,27 @@ body.dark {
   align-items: center;
   border-radius: 5px;
   background-color: var(--primary-color);
+  transition: background-color 0.2s ease-in;
 }
-
+.theme-toggle:hover {
+  background-color: #5850dd;
+}
 .search-input {
   width: 100%;
   height: 38px;
   padding: 11px 40px 11px 16px;
   border: 1px solid var(--primary-color);
   border-radius: 5px;
+  color: var(--primary-color);
   background: url("./../assets/icons/search-icon.svg") no-repeat right 8.5px
     center;
+}
+
+.search-input.dark {
+  color: var(--white);
+  border: 1px solid var(--white);
+  background: url("./../assets/icons/dark-search-icon.svg") no-repeat right
+    8.5px center;
 }
 .search-input::placeholder,
 .modal__input::placeholder {
@@ -77,23 +92,40 @@ body.dark {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease-in;
 }
-
+.add-button:hover {
+  background-color: #534cc2;
+}
 .modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 30px;
+}
+.modal__main {
   position: absolute;
   top: 118px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 14px 30px;
   width: 500px;
+  background-color: var(--white);
   border-radius: 16px;
+  padding: 18px 30px;
 }
-
+.modal__main.dark {
+  background-color: rgba(37, 37, 37, 1);
+  border: 1px solid var(--white);
+}
 .modal__title {
   font-weight: 500;
   font-size: 24px;
   margin-bottom: 25px;
   text-align: center;
+}
+.modal__title.dark {
+  color: var(--white);
 }
 
 .modal__input {
@@ -102,6 +134,9 @@ body.dark {
   border-radius: 5px;
   border: 1px solid var(--primary-color);
   margin-bottom: 128px;
+}
+.modal__input.dark {
+  border: 1px solid var(--white);
 }
 
 .modal__buttons {
@@ -118,9 +153,16 @@ body.dark {
   border: 1px solid var(--primary-color);
   color: var(--primary-color);
   cursor: pointer;
+  transition: all 0.2s linear;
 }
-
 .modal__buttons-apply {
   background-color: var(--primary-color);
   color: var(--white);
+}
+.modal__buttons-cancel:hover {
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+.modal__buttons-apply:hover {
+  background-color: rgb(64, 57, 173);
 }
