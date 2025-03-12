@@ -53,7 +53,6 @@
             <p class="empty-text">Empty...</p>
           </div>
         </section>
-
         <button class="add-button" type="button" aria-label="Add new note">
           <svg
             width="24"
@@ -70,10 +69,29 @@
             />
           </svg>
         </button>
+        <button type="button" class="undo-button">
+          <div class="timer-container">
+            <svg class="timer-circle" width="30" height="30" viewBox="0 0 24 24">
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="var(--white)" <!-- Белый цвет круга -->
+                stroke-width="2"
+                fill="none"
+                stroke-dasharray="63"
+                stroke-dashoffset="63"
+              />
+            </svg>
+            <span class="timer">3</span>
+          </div>
+          <span>UNDO</span>
+          <img src="./assets/icons/undo-button.svg" alt="Undo Button" />
+        </button>
       </div>
     </div>
 
-    <div class="modal" aria-labelledby="modal-title">
+    <div class="modal">
       <div class="modal__main">
         <h2 class="modal__title" id="modal-title">NEW NOTE</h2>
         <input
@@ -88,6 +106,7 @@
         </div>
       </div>
     </div>
+
     <script src="./scripts/app.js"></script>
   </body>
 </html>

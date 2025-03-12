@@ -33,6 +33,7 @@ const themes = {
           </svg>`,
   },
 };
+
 function getEditIcon() {
   return `
     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -52,6 +53,7 @@ function getDeleteIcon() {
     </svg>
   `;
 }
+
 // Функции для работы с localStorage
 function saveTasksToLocalStorage() {
   localStorage.setItem("todoItems", JSON.stringify(todoItems));
@@ -183,16 +185,79 @@ searchInput.addEventListener("input", (e) => {
   });
   updateBorders();
 });
+function startTimer() {
+  const timerElement = document.querySelector(".undo-button .timer");
+  const timerCircle = document.querySelector(
+    ".undo-button .timer-circle circle"
+  );
 
+  remainingTime = 3; // Сбросить время до 3 секунд
+  timerElement.textContent = remainingTime; // Установить начальное значение
+
+  // Сбросить анимацию круга
+  timerCircle.style.animation = "none";
+  timerCircle.offsetHeight; // Триггер перерисовки
+  timerCircle.style.animation = null;
+
+  // Запустить таймер
+  timerInterval = setInterval(() => {
+    remainingTime--; // Уменьшить время на 1 секунду
+    timerElement.textContent = remainingTime; // Обновить текст таймера
+
+    // Если время истекло
+    if (remainingTime <= 0) {
+      clearInterval(timerInterval); // Остановить таймер
+      hideUndoButton(); // Скрыть кнопку "Undo"
+      deletedTask = null; // Очистить временное хранилище
+    }
+  }, 1000); // Обновлять каждую секунду
+}
 // Удаление задачи
 function deleteTask(id) {
   const index = todoItems.findIndex((item) => item.id === Number(id));
   if (index !== -1) {
-    todoItems.splice(index, 1);
-    saveTasksToLocalStorage();
-    renderTasks();
+    deletedTask = todoItems[index]; // Сохраняем удалённую задачу
+    todoItems.splice(index, 1); // Удаляем задачу из массива
+    saveTasksToLocalStorage(); // Сохраняем изменения
+    renderTasks(); // Перерисовываем задачи
+
+    // Показываем кнопку "Undo"
+    showUndoButton();
+    startTimer();
+    // Устанавливаем таймер на 3 секунды для окончательного удаления
   }
 }
+
+// Функция для восстановления задачи
+function undoDelete() {
+  if (deletedTask) {
+    todoItems.push(deletedTask); // Возвращаем задачу в массив
+    saveTasksToLocalStorage(); // Сохраняем изменения
+    renderTasks(); // Перерисовываем задачи
+    deletedTask = null; // Очищаем временное хранилище
+    hideUndoButton(); // Скрываем кнопку "Undo"
+    if (deletionTimeout) {
+      clearTimeout(deletionTimeout); // Очищаем таймер
+    }
+  }
+}
+
+// Функция для показа кнопки "Undo"
+function showUndoButton() {
+  const undoButton = document.querySelector(".undo-button");
+  undoButton.style.display = "flex"; // Показываем кнопку
+}
+
+// Функция для скрытия кнопки "Undo"
+function hideUndoButton() {
+  const undoButton = document.querySelector(".undo-button");
+  undoButton.style.display = "none"; // Скрываем кнопку
+}
+
+// Обработчик для кнопки "Undo"
+document.querySelector(".undo-button").addEventListener("click", () => {
+  undoDelete(); // Восстанавливаем задачу
+});
 
 // Завершение задачи
 function completeTask(id) {

@@ -2,6 +2,7 @@
 :root {
   --primary-color: #6c63ff;
   --white: #f7f7f7;
+  --hover-primary-color: #5850dd;
 }
 
 body {
@@ -49,7 +50,7 @@ body {
   transition: background-color 0.2s ease-in;
 }
 .theme-toggle:hover {
-  background-color: var(--primary-color);
+  background-color: var(--hover-primary-color);
 }
 .search-input {
   width: 100%;
@@ -93,7 +94,68 @@ body {
   transition: all 0.2s ease-in;
 }
 .add-button:hover {
+  background-color: var(--hover-primary-color);
+}
+.undo-button {
+  position: absolute;
+  bottom: 100px;
+  right: 8px;
+  width: 123px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(var(--primary-color), 0.7);
+  background-color: var(--hover-primary-color);
+  border-radius: 4px;
+  padding: 6px 3px;
+  color: var(--white);
+  gap: 8px;
+  transition: background-color 0.2s ease-in;
+}
+
+.undo-button:hover {
   background-color: var(--primary-color);
+}
+
+.timer-container {
+  position: relative;
+  width: 30px; /* Увеличиваем размер контейнера */
+  height: 30px; /* Увеличиваем размер контейнера */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-circle {
+  position: absolute;
+  width: 30px; /* Увеличиваем размер круга */
+  height: 30px; /* Увеличиваем размер круга */
+  transform: rotate(-90deg); /* Начальное положение круга */
+}
+
+.timer-circle circle {
+  animation: countdown 3s linear forwards; /* Анимация на 3 секунды */
+  stroke: var(--white); /* Белый цвет круга */
+  stroke-width: 2; /* Толщина линии круга */
+  fill: none; /* Прозрачный фон */
+  stroke-dasharray: 63; /* Длина окружности (2 * π * r) */
+  stroke-dashoffset: 63; /* Начальное значение */
+}
+.timer {
+  position: absolute;
+  font-size: 16px; /* Размер числа */
+  font-weight: bold;
+  color: var(--white);
+  z-index: 1; /* Число поверх круга */
+}
+
+@keyframes countdown {
+  from {
+    stroke-dashoffset: 63; /* Начальное значение */
+  }
+  to {
+    stroke-dashoffset: 0; /* Конечное значение */
+  }
 }
 .modal {
   position: fixed;
@@ -156,12 +218,13 @@ body {
   color: var(--white);
 }
 .modal__buttons-cancel:hover {
-  background-color: var(--primary-color);
+  background-color: var(--hover-primary-color);
   color: var(--white);
 }
 .modal__buttons-apply:hover {
-  background-color: rgb(64, 57, 173);
+  background-color: var(--hover-primary-color);
 }
+
 .tasks-section__empty {
   display: flex;
   flex-direction: column;
@@ -180,6 +243,14 @@ body {
   font-weight: 500;
   font-size: 20px;
   text-transform: uppercase;
+}
+.tasks-section__list-item .list-item__buttons {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.tasks-section__list-item:hover .list-item__buttons {
+  opacity: 1;
 }
 .tasks-section__list-item {
   border-bottom: 1px solid var(--primary-color);
