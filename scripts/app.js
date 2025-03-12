@@ -1,6 +1,7 @@
+// Элементы DOM
 const themeToggleButton = document.querySelector(".theme-toggle");
-const emptyImage = document.querySelector(".empty-img");
-const emptyText = document.querySelector(".empty-text");
+const emptySection = document.querySelector(".tasks-section__empty");
+
 const addButton = document.querySelector(".add-button");
 const container = document.querySelector(".container");
 const modalCloseButton = document.querySelector(".modal__buttons-cancel");
@@ -12,6 +13,10 @@ const tasksSection = document.querySelector(".tasks-section");
 tasksSection.appendChild(tasksList);
 tasksList.classList.add("tasks-section__list");
 
+// Массив задач
+const todoItems = [];
+
+// Темы
 const themes = {
   light: {
     textColor: "black",
@@ -28,28 +33,104 @@ const themes = {
           </svg>`,
   },
 };
-const updateTasksView = () => {
-  const isEmpty = tasksList.children.length === 0;
-  emptyImage.style.display = isEmpty ? "block" : "none";
-  emptyText.style.display = isEmpty ? "block" : "none";
+function getEditIcon() {
+  return `
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7.67272 3.99106L1 10.6637V14H4.33636L11.0091 7.32736M7.67272 3.99106L10.0654 1.59837L10.0669 1.59695C10.3962 1.26759 10.5612 1.10261 10.7514 1.04082C10.9189 0.986392 11.0993 0.986392 11.2669 1.04082C11.4569 1.10257 11.6217 1.26735 11.9506 1.59625L13.4018 3.04738C13.7321 3.37769 13.8973 3.54292 13.9592 3.73337C14.0136 3.90088 14.0136 4.08133 13.9592 4.24885C13.8974 4.43916 13.7324 4.60414 13.4025 4.93398L13.4018 4.93468L11.0091 7.32736M7.67272 3.99106L11.0091 7.32736" stroke="#CDCDCD" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  `;
+}
 
+function getDeleteIcon() {
+  return `
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3.87414 7.61505C3.80712 6.74386 4.49595 6 5.36971 6H12.63C13.5039 6 14.1927 6.74385 14.1257 7.61505L13.6064 14.365C13.5463 15.1465 12.8946 15.75 12.1108 15.75H5.88894C5.10514 15.75 4.45348 15.1465 4.39336 14.365L3.87414 7.61505Z" stroke="#CDCDCD"/>
+      <path d="M14.625 3.75H3.375" stroke="#CDCDCD" stroke-linecap="round"/>
+      <path d="M7.5 2.25C7.5 1.83579 7.83577 1.5 8.25 1.5H9.75C10.1642 1.5 10.5 1.83579 10.5 2.25V3.75H7.5V2.25Z" stroke="#CDCDCD"/>
+      <path d="M10.5 9V12.75" stroke="#CDCDCD" stroke-linecap="round"/>
+      <path d="M7.5 9V12.75" stroke="#CDCDCD" stroke-linecap="round"/>
+    </svg>
+  `;
+}
+// Функции для работы с localStorage
+function saveTasksToLocalStorage() {
+  localStorage.setItem("todoItems", JSON.stringify(todoItems));
+}
+
+function loadTasksFromLocalStorage() {
+  const storedTasks = localStorage.getItem("todoItems");
+  if (storedTasks) {
+    todoItems.push(...JSON.parse(storedTasks));
+    renderTasks();
+  }
+}
+
+function renderTasks() {
+  tasksList.innerHTML = "";
+  todoItems.forEach((todoItem) => {
+    tasksList.insertAdjacentHTML(
+      "beforeend",
+      `
+      <li class="tasks-section__list-item list-item" data-key=${todoItem.id}>
+        <input id=${todoItem.id} type="checkbox" ${
+        todoItem.checked ? "checked" : ""
+      }/>
+        <label for="${todoItem.id}" class="list-item__checkbox"></label>
+        <input value=${
+          todoItem.taskText
+        } type="text" class="list__item-text" readonly="true"/>
+        <div class="list-item__buttons">
+          <button class="edit-button">${getEditIcon()}</button>
+          <button class="delete-button">${getDeleteIcon()}</button>
+        </div>
+      </li>
+      `
+    );
+  });
+  updateTasksView();
+  updateBorders();
+}
+
+// Обновление границ
+function updateBorders() {
+  const visibleTasks = Array.from(tasksList.children).filter(
+    (task) => task.style.display !== "none"
+  );
+  visibleTasks.forEach((task, index) => {
+    task.style.borderBottom =
+      index === visibleTasks.length - 1
+        ? "none"
+        : "1px solid var(--primary-color)";
+    task.style.borderTop = "none";
+  });
+}
+
+// Обновление отображения задач
+function updateTasksView() {
+  const isEmpty = tasksList.children.length === 0;
+  emptySection.style.display = isEmpty ? "flex" : "none";
   tasksList.style.display = isEmpty ? "none" : "block";
-};
-const updateTheme = () => {
+}
+
+// Обновление темы
+function updateTheme() {
   const isDarkMode = container.classList.contains("dark");
   const theme = isDarkMode ? themes.dark : themes.light;
-
+  const emptyImage = emptySection.children[0];
+  const emptyText = emptySection.children[1];
   emptyImage.src = theme.emptyImageSrc;
   emptyText.style.color = theme.textColor;
   themeToggleButton.innerHTML = theme.icon;
   searchInput.classList.toggle("dark", isDarkMode);
-};
+}
 
+// Переключение темы
 themeToggleButton.addEventListener("click", () => {
   container.classList.toggle("dark");
   updateTheme();
 });
 
+// Открытие модального окна
 addButton.addEventListener("click", () => {
   const isDarkMode = container.classList.contains("dark");
   if (isDarkMode) {
@@ -60,83 +141,131 @@ addButton.addEventListener("click", () => {
   }
   modal.style.display = "block";
   container.classList.add("modal-open");
+  updateBorders();
 });
 
+// Закрытие модального окна
 modalCloseButton.addEventListener("click", () => {
   modal.style.display = "none";
   container.classList.remove("modal-open");
 });
 
+// Добавление задачи
 modalApplyButton.addEventListener("click", () => {
   const modalTaskInput = document.querySelector(".modal__input");
   const taskText = modalTaskInput.value.trim();
   if (!taskText) {
     return;
   }
-  const listItem = document.createElement("li");
-  listItem.innerHTML = `<label>
-  <input type="checkbox" class="real-checkbox">
-  <span class="custom-checkbox"></span>
-  <span class="list__item-text">${taskText}</span>
-</label>
-<div class="list__item-buttons">
-  <button class="edit-button">
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 15 15"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M7.67272 3.99106L1 10.6637V14H4.33636L11.0091 7.32736M7.67272 3.99106L10.0654 1.59837L10.0669 1.59695C10.3962 1.26759 10.5612 1.10261 10.7514 1.04082C10.9189 0.986392 11.0993 0.986392 11.2669 1.04082C11.4569 1.10257 11.6217 1.26735 11.9506 1.59625L13.4018 3.04738C13.7321 3.37769 13.8973 3.54292 13.9592 3.73337C14.0136 3.90088 14.0136 4.08133 13.9592 4.24885C13.8974 4.43916 13.7324 4.60414 13.4025 4.93398L13.4018 4.93468L11.0091 7.32736M7.67272 3.99106L11.0091 7.32736"
-        stroke="#CDCDCD"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-    </svg>
-  </button>
-  <button class="delete-button">
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M3.87414 7.61505C3.80712 6.74386 4.49595 6 5.36971 6H12.63C13.5039 6 14.1927 6.74385 14.1257 7.61505L13.6064 14.365C13.5463 15.1465 12.8946 15.75 12.1108 15.75H5.88894C5.10514 15.75 4.45348 15.1465 4.39336 14.365L3.87414 7.61505Z"
-        stroke="#CDCDCD"
-      />
-      <path d="M14.625 3.75H3.375" stroke="#CDCDCD" stroke-linecap="round" />
-      <path
-        d="M7.5 2.25C7.5 1.83579 7.83577 1.5 8.25 1.5H9.75C10.1642 1.5 10.5 1.83579 10.5 2.25V3.75H7.5V2.25Z"
-        stroke="#CDCDCD"
-      />
-      <path d="M10.5 9V12.75" stroke="#CDCDCD" stroke-linecap="round" />
-      <path d="M7.5 9V12.75" stroke="#CDCDCD" stroke-linecap="round" />
-    </svg>
-  </button>
-</div>`;
-  listItem.classList.add("tasks-section__list-item");
-  tasksList.appendChild(listItem);
+  const todoItem = {
+    taskText,
+    checked: false,
+    id: Date.now(),
+  };
+  todoItems.push(todoItem);
+  saveTasksToLocalStorage();
+  renderTasks();
   modal.style.display = "none";
   container.classList.remove("modal-open");
   modalTaskInput.value = "";
-  updateTasksView();
 });
 
+// Поиск задач
 searchInput.addEventListener("input", (e) => {
-  const searchInputValue = e.target.value.trim().toLowerCase(); // Приводим к нижнему регистру
-
+  const searchInputValue = e.target.value.trim().toLowerCase();
   Array.from(tasksList.children).forEach((task) => {
-    const taskText = task
-      .querySelector(".list__item-text")
-      .textContent.toLowerCase(); // Получаем текст задачи
+    const taskText = task.querySelector(".list__item-text").value.toLowerCase();
     if (taskText.startsWith(searchInputValue)) {
-      task.style.display = "flex"; // Показываем задачу
+      task.style.display = "flex";
     } else {
-      task.style.display = "none"; // Скрываем задачу
+      task.style.display = "none";
     }
   });
+  updateBorders();
+});
+
+// Удаление задачи
+function deleteTask(id) {
+  const index = todoItems.findIndex((item) => item.id === Number(id));
+  if (index !== -1) {
+    todoItems.splice(index, 1);
+    saveTasksToLocalStorage();
+    renderTasks();
+  }
+}
+
+// Завершение задачи
+function completeTask(id) {
+  const index = todoItems.findIndex((item) => item.id === Number(id));
+  todoItems[index].checked = !todoItems[index].checked;
+  saveTasksToLocalStorage();
+  const item = document.querySelector(`[data-key='${id}']`);
+  if (todoItems[index].checked) {
+    item.classList.add("done");
+  } else {
+    item.classList.remove("done");
+  }
+  updateBorders();
+}
+
+// Редактирование задачи
+function editTask(id) {
+  const taskElement = document.querySelector(`[data-key='${id}']`);
+  if (!taskElement) return;
+  const taskElementInput = taskElement.querySelector(
+    'input[type="text"]:last-of-type'
+  );
+  if (taskElementInput) {
+    taskElementInput.removeAttribute("readonly");
+    taskElementInput.focus();
+    const length = taskElementInput.value.length;
+    taskElementInput.setSelectionRange(length, length);
+
+    const saveChanges = () => {
+      const newText = taskElementInput.value.trim();
+      if (newText) {
+        const index = todoItems.findIndex((item) => item.id === Number(id));
+        if (index !== -1) {
+          todoItems[index].taskText = newText;
+          saveTasksToLocalStorage();
+        }
+      }
+      taskElementInput.setAttribute("readonly", true);
+      updateBorders();
+    };
+
+    taskElementInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        saveChanges();
+      }
+    });
+
+    taskElementInput.addEventListener("blur", saveChanges);
+  }
+}
+
+// Обработка кликов
+tasksList.addEventListener("click", (event) => {
+  event.preventDefault();
+  if (event.target.classList.contains("list-item__checkbox")) {
+    const todoItemId = event.target.closest(".list-item").dataset.key;
+    completeTask(todoItemId);
+  }
+
+  const deleteButton = event.target.closest(".delete-button");
+  if (deleteButton) {
+    const todoItemId = deleteButton.closest(".list-item").dataset.key;
+    deleteTask(todoItemId);
+  }
+
+  const editButton = event.target.closest(".edit-button");
+  if (editButton) {
+    const todoItemId = editButton.closest(".list-item").dataset.key;
+    editTask(todoItemId);
+  }
+});
+
+// Загрузка задач при загрузке страницы
+document.addEventListener("DOMContentLoaded", () => {
+  loadTasksFromLocalStorage();
 });
