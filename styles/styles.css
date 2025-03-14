@@ -31,15 +31,14 @@ body {
   margin-bottom: 18px;
 }
 
-.search-and-toggle {
+.controls {
   display: flex;
   gap: 16px;
   align-items: center;
-  justify-content: space-between;
   margin-bottom: 30px;
 }
 
-.theme-toggle {
+.controls__theme-toggle {
   width: 40px;
   height: 38px;
   display: flex;
@@ -49,13 +48,15 @@ body {
   background-color: var(--primary-color);
   transition: background-color 0.2s ease-in;
 }
-.theme-toggle:hover {
+
+.controls__theme-toggle:hover {
   background-color: var(--hover-primary-color);
 }
-.search-input {
-  width: 100%;
+
+.controls__search {
+  flex-grow: 1;
   height: 38px;
-  padding: 11px 40px 11px 16px;
+  padding: 0 40px 0 16px;
   border: 1px solid var(--primary-color);
   border-radius: 5px;
   color: var(--primary-color);
@@ -63,13 +64,30 @@ body {
     center;
 }
 
-.search-input.dark {
+.controls__search.dark {
   color: var(--white);
   border: 1px solid var(--white);
   background: url("./../assets/icons/dark-search-icon.svg") no-repeat right
     8.5px center;
 }
-.search-input::placeholder,
+
+.controls__filter {
+  height: 38px;
+  outline: none;
+  border-radius: 5px;
+  background-color: var(--primary-color);
+  color: var(--white);
+  cursor: pointer;
+  transition: all 0.2s ease-in;
+  font-size: 16px;
+}
+.controls__filter.open {
+  background-color: var(--white);
+}
+.controls__filter:hover {
+  background-color: var(--hover-primary-color);
+}
+.controls__search::placeholder,
 .modal__input::placeholder {
   font-family: "Inter";
   color: #c3c1e5;

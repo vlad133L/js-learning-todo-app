@@ -1,20 +1,48 @@
 // Элементы DOM
-const themeToggleButton = document.querySelector(".theme-toggle");
+const themeToggleButton = document.querySelector(".controls__theme-toggle");
 const emptySection = document.querySelector(".tasks-section__empty");
-
+const filterSelect = document.querySelector(".controls__filter");
 const addButton = document.querySelector(".add-button");
 const container = document.querySelector(".container");
 const modalCloseButton = document.querySelector(".modal__buttons-cancel");
 const modalApplyButton = document.querySelector(".modal__buttons-apply");
 const modal = document.querySelector(".modal");
-const searchInput = document.querySelector(".search-input");
+const searchInput = document.querySelector(".controls__search");
 const tasksList = document.createElement("ul");
 const tasksSection = document.querySelector(".tasks-section");
+const selectFilter = document.querySelector(".controls__filter");
 tasksSection.appendChild(tasksList);
 tasksList.classList.add("tasks-section__list");
 
 // Массив задач
 const todoItems = [];
+selectFilter.addEventListener("change", (event) => {
+  const selectedOption = event.target.value;
+  filterTasks(selectedOption);
+});
+function filterTasks(filter) {
+  const tasks = Array.from(tasksList.children); // Получаем все задачи
+
+  tasks.forEach((task) => {
+    const isCompleted = task.querySelector('input[type="checkbox"]').checked;
+
+    switch (filter) {
+      case "All":
+        task.style.display = "flex"; // Показываем все задачи
+        break;
+      case "Complete":
+        task.style.display = isCompleted ? "flex" : "none"; // Показываем только выполненные
+        break;
+      case "Incomplete":
+        task.style.display = !isCompleted ? "flex" : "none"; // Показываем только невыполненные
+        break;
+      default:
+        task.style.display = "flex"; // По умолчанию показываем все задачи
+    }
+  });
+
+  updateBorders(); // Обновляем границы задач
+}
 
 // Темы
 const themes = {
@@ -68,29 +96,40 @@ function loadTasksFromLocalStorage() {
 }
 
 function renderTasks() {
-  tasksList.innerHTML = "";
+  tasksList.innerHTML = ""; // Очищаем список задач
   todoItems.forEach((todoItem) => {
-    tasksList.insertAdjacentHTML(
-      "beforeend",
-      `
-      <li class="tasks-section__list-item list-item" data-key=${todoItem.id}>
-        <input id=${todoItem.id} type="checkbox" ${
-        todoItem.checked ? "checked" : ""
-      }/>
-        <label for="${todoItem.id}" class="list-item__checkbox"></label>
-        <input value=${
-          todoItem.taskText
-        } type="text" class="list__item-text" readonly="true"/>
-        <div class="list-item__buttons">
-          <button class="edit-button">${getEditIcon()}</button>
-          <button class="delete-button">${getDeleteIcon()}</button>
-        </div>
-      </li>
-      `
-    );
+    const taskElement = document.createElement("li");
+    taskElement.classList.add("tasks-section__list-item", "list-item");
+    taskElement.setAttribute("data-key", todoItem.id);
+
+    taskElement.innerHTML = `
+      <input id=${todoItem.id} type="checkbox" ${
+      todoItem.checked ? "checked" : ""
+    }/>
+      <label for="${todoItem.id}" class="list-item__checkbox"></label>
+      <input value=${
+        todoItem.taskText
+      } type="text" class="list__item-text" readonly="true"/>
+      <div class="list-item__buttons">
+        <button class="edit-button">${getEditIcon()}</button>
+        <button class="delete-button">${getDeleteIcon()}</button>
+      </div>
+    `;
+
+    // Добавляем класс "done", если задача выполнена
+    if (todoItem.checked) {
+      taskElement.classList.add("done");
+    }
+
+    tasksList.appendChild(taskElement);
   });
-  updateTasksView();
-  updateBorders();
+
+  // Применяем текущий фильтр после рендеринга задач
+  const selectedFilter = selectFilter.value;
+  filterTasks(selectedFilter);
+
+  updateTasksView(); // Обновляем отображение задач
+  updateBorders(); // Обновляем границы
 }
 
 // Обновление границ
@@ -208,36 +247,61 @@ function startTimer() {
     if (remainingTime <= 0) {
       clearInterval(timerInterval); // Остановить таймер
       hideUndoButton(); // Скрыть кнопку "Undo"
-      deletedTask = null; // Очистить временное хранилище
     }
   }, 1000); // Обновлять каждую секунду
 }
 // Удаление задачи
+// Удаление задачи (временное скрытие)
 function deleteTask(id) {
-  const index = todoItems.findIndex((item) => item.id === Number(id));
-  if (index !== -1) {
-    deletedTask = todoItems[index]; // Сохраняем удалённую задачу
-    todoItems.splice(index, 1); // Удаляем задачу из массива
-    saveTasksToLocalStorage(); // Сохраняем изменения
-    renderTasks(); // Перерисовываем задачи
+  const taskElement = document.querySelector(`[data-key='${id}']`);
+  if (!taskElement) return;
 
-    // Показываем кнопку "Undo"
-    showUndoButton();
-    startTimer();
-    // Устанавливаем таймер на 3 секунды для окончательного удаления
-  }
+  // Скрываем задачу
+  taskElement.style.display = "none";
+
+  // Сохраняем удалённую задачу для возможного восстановления
+  deletedTask = {
+    id: id,
+    element: taskElement,
+  };
+
+  // Показываем кнопку "Undo"
+  showUndoButton();
+  startTimer();
+  updateBorders();
+  // Устанавливаем таймер на 3 секунды для окончательного удаления
+  deletionTimeout = setTimeout(() => {
+    if (deletedTask) {
+      // Удаляем задачу из массива
+      const index = todoItems.findIndex((item) => item.id === Number(id));
+      if (index !== -1) {
+        todoItems.splice(index, 1);
+        saveTasksToLocalStorage();
+      }
+
+      // Очищаем временное хранилище
+      deletedTask = null;
+      hideUndoButton();
+    }
+  }, 3000); // 3 секунды
 }
 
 // Функция для восстановления задачи
+// Функция для восстановления задачи
 function undoDelete() {
   if (deletedTask) {
-    todoItems.push(deletedTask); // Возвращаем задачу в массив
-    saveTasksToLocalStorage(); // Сохраняем изменения
-    renderTasks(); // Перерисовываем задачи
-    deletedTask = null; // Очищаем временное хранилище
-    hideUndoButton(); // Скрываем кнопку "Undo"
+    // Возвращаем задачу на место
+    deletedTask.element.style.display = "flex";
+
+    // Очищаем временное хранилище
+    deletedTask = null;
+
+    // Скрываем кнопку "Undo"
+    hideUndoButton();
+
+    // Очищаем таймер
     if (deletionTimeout) {
-      clearTimeout(deletionTimeout); // Очищаем таймер
+      clearTimeout(deletionTimeout);
     }
   }
 }
@@ -257,20 +321,24 @@ function hideUndoButton() {
 // Обработчик для кнопки "Undo"
 document.querySelector(".undo-button").addEventListener("click", () => {
   undoDelete(); // Восстанавливаем задачу
+  updateBorders();
 });
-
-// Завершение задачи
 function completeTask(id) {
   const index = todoItems.findIndex((item) => item.id === Number(id));
+  if (index === -1) return; // Если задача не найдена, выходим
+
+  // Меняем состояние задачи
   todoItems[index].checked = !todoItems[index].checked;
-  saveTasksToLocalStorage();
-  const item = document.querySelector(`[data-key='${id}']`);
-  if (todoItems[index].checked) {
-    item.classList.add("done");
-  } else {
-    item.classList.remove("done");
+  saveTasksToLocalStorage(); // Сохраняем изменения в localStorage
+
+  // Обновляем класс "done" у задачи
+  const taskElement = document.querySelector(`[data-key='${id}']`);
+  if (taskElement) {
+    taskElement.classList.toggle("done", todoItems[index].checked);
   }
-  updateBorders();
+
+  // Перерисовываем задачи с учётом текущего фильтра
+  renderTasks();
 }
 
 // Редактирование задачи
@@ -312,17 +380,21 @@ function editTask(id) {
 // Обработка кликов
 tasksList.addEventListener("click", (event) => {
   event.preventDefault();
+
+  // Обработка клика по чекбоксу
   if (event.target.classList.contains("list-item__checkbox")) {
     const todoItemId = event.target.closest(".list-item").dataset.key;
-    completeTask(todoItemId);
+    completeTask(todoItemId); // Вызываем completeTask
   }
 
+  // Обработка клика по кнопке удаления
   const deleteButton = event.target.closest(".delete-button");
   if (deleteButton) {
     const todoItemId = deleteButton.closest(".list-item").dataset.key;
     deleteTask(todoItemId);
   }
 
+  // Обработка клика по кнопке редактирования
   const editButton = event.target.closest(".edit-button");
   if (editButton) {
     const todoItemId = editButton.closest(".list-item").dataset.key;
@@ -330,7 +402,8 @@ tasksList.addEventListener("click", (event) => {
   }
 });
 
-// Загрузка задач при загрузке страницы
 document.addEventListener("DOMContentLoaded", () => {
-  loadTasksFromLocalStorage();
+  loadTasksFromLocalStorage(); // Загружаем задачи
+  const selectedFilter = selectFilter.value;
+  filterTasks(selectedFilter);
 });

@@ -13,15 +13,20 @@
         <header class="header">
           <h1 class="title">TODO LIST</h1>
 
-          <section class="search-and-toggle">
+          <section class="controls">
             <input
-              class="search-input"
+              class="controls__search"
               type="text"
               placeholder="Search note..."
               aria-label="Search notes"
             />
+            <select class="controls__filter">
+              <option value="All">All</option>
+              <option value="Complete">Complete</option>
+              <option value="Incomplete">Incomplete</option>
+            </select>
             <button
-              class="theme-toggle"
+              class="controls__theme-toggle"
               type="button"
               aria-label="Toggle theme"
             >
