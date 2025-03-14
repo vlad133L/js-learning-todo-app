@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
 :root {
   --primary-color: #6c63ff;
   --white: #f7f7f7;
@@ -9,13 +10,16 @@ body {
   font-family: "Kanit", sans-serif;
   box-sizing: border-box;
 }
+
 .container.dark {
   background-color: #252525;
   color: var(--white);
 }
+
 .container.modal-open {
   background-color: #252525b2;
 }
+
 .wrapper {
   position: relative;
   max-width: 750px;
@@ -81,17 +85,17 @@ body {
   transition: all 0.2s ease-in;
   font-size: 16px;
 }
-.controls__filter.open {
-  background-color: var(--white);
-}
+
 .controls__filter:hover {
   background-color: var(--hover-primary-color);
 }
+
 .controls__search::placeholder,
 .modal__input::placeholder {
   font-family: "Inter";
   color: #c3c1e5;
 }
+
 .empty-text {
   margin-top: 20px;
   font-size: 20px;
@@ -111,9 +115,11 @@ body {
   justify-content: center;
   transition: all 0.2s ease-in;
 }
+
 .add-button:hover {
   background-color: var(--hover-primary-color);
 }
+
 .undo-button {
   position: absolute;
   bottom: 100px;
@@ -137,8 +143,8 @@ body {
 
 .timer-container {
   position: relative;
-  width: 30px; /* Увеличиваем размер контейнера */
-  height: 30px; /* Увеличиваем размер контейнера */
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -146,35 +152,37 @@ body {
 
 .timer-circle {
   position: absolute;
-  width: 30px; /* Увеличиваем размер круга */
-  height: 30px; /* Увеличиваем размер круга */
-  transform: rotate(-90deg); /* Начальное положение круга */
+  width: 30px;
+  height: 30px;
+  transform: rotate(-90deg);
 }
 
 .timer-circle circle {
-  animation: countdown 3s linear forwards; /* Анимация на 3 секунды */
-  stroke: var(--white); /* Белый цвет круга */
-  stroke-width: 2; /* Толщина линии круга */
-  fill: none; /* Прозрачный фон */
-  stroke-dasharray: 63; /* Длина окружности (2 * π * r) */
-  stroke-dashoffset: 63; /* Начальное значение */
+  animation: countdown 3s linear forwards;
+  stroke: var(--white);
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 63;
+  stroke-dashoffset: 63;
 }
+
 .timer {
   position: absolute;
-  font-size: 16px; /* Размер числа */
+  font-size: 16px;
   font-weight: bold;
   color: var(--white);
-  z-index: 1; /* Число поверх круга */
+  z-index: 1;
 }
 
 @keyframes countdown {
   from {
-    stroke-dashoffset: 63; /* Начальное значение */
+    stroke-dashoffset: 63;
   }
   to {
-    stroke-dashoffset: 0; /* Конечное значение */
+    stroke-dashoffset: 0;
   }
 }
+
 .modal {
   position: fixed;
   inset: 0;
@@ -182,6 +190,7 @@ body {
   background-color: rgba(0, 0, 0, 0.6);
   padding: 30px;
 }
+
 .modal__main {
   position: absolute;
   top: 118px;
@@ -192,11 +201,13 @@ body {
   border-radius: 16px;
   padding: 18px 30px;
 }
+
 .modal__main.dark {
   color: var(--white);
   background-color: rgba(37, 37, 37, 1);
   border: 1px solid var(--white);
 }
+
 .modal__title {
   font-weight: 500;
   font-size: 24px;
@@ -211,6 +222,7 @@ body {
   border: 1px solid var(--primary-color);
   margin-bottom: 128px;
 }
+
 .modal__input.dark {
   border: 1px solid var(--white);
 }
@@ -231,14 +243,17 @@ body {
   cursor: pointer;
   transition: all 0.2s linear;
 }
+
 .modal__buttons-apply {
   background-color: var(--primary-color);
   color: var(--white);
 }
+
 .modal__buttons-cancel:hover {
   background-color: var(--hover-primary-color);
   color: var(--white);
 }
+
 .modal__buttons-apply:hover {
   background-color: var(--hover-primary-color);
 }
@@ -250,9 +265,11 @@ body {
   justify-content: center;
   text-align: center;
 }
+
 .tasks-section__list {
   display: none;
 }
+
 .tasks-section__list-item {
   display: flex;
   align-items: center;
@@ -262,6 +279,7 @@ body {
   font-size: 20px;
   text-transform: uppercase;
 }
+
 .tasks-section__list-item .list-item__buttons {
   opacity: 0;
   transition: opacity 0.2s ease;
@@ -270,6 +288,7 @@ body {
 .tasks-section__list-item:hover .list-item__buttons {
   opacity: 1;
 }
+
 .tasks-section__list-item {
   border-bottom: 1px solid var(--primary-color);
   padding-top: 10px;
@@ -283,19 +302,23 @@ body {
 .tasks-section__list-item:last-child {
   border-bottom: none;
 }
+
 .list__item-text {
   flex-grow: 1;
   margin-right: 15px;
   border: 1px solid transparent;
   padding-left: 10px;
 }
+
 .list__item-text:focus {
   border: 1px solid var(--primary-color);
   border-radius: 6px;
 }
+
 .container.dark .real-checkbox:checked ~ .list__item-text {
   color: rgba(255, 255, 255, 0.5);
 }
+
 @keyframes changeFill {
   from {
     fill: #cdcdcd;
@@ -313,9 +336,11 @@ body {
     stroke: red;
   }
 }
+
 .tasks-section__list-item:has(.real-checkbox:checked) .list-item__buttons {
   display: none;
 }
+
 .edit-button:hover svg {
   animation: changeFill 0.2s ease-in forwards;
 }
@@ -336,28 +361,35 @@ body {
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
+
 .list-item__checkbox::before {
   content: "✔";
   font-size: 20px;
   color: var(--white);
   display: none;
 }
+
 .list-item__checkbox:checked {
   background-color: var(--primary-color);
 }
+
 .list__item-text {
   flex-grow: 1;
 }
+
 .done .list__item-text {
   text-decoration: line-through;
   color: #c3c1e5;
 }
+
 .done .list-item__checkbox {
   background-color: var(--primary-color);
 }
+
 .done .list-item__checkbox::before {
   display: inline;
 }
+
 input[type="checkbox"] {
   display: none;
 }
