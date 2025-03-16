@@ -1,24 +1,25 @@
 import { themeIcons } from "./modules/themeIcons.js";
 import { taskIcons } from "./modules/taskIcons.js";
+import { debounce } from "./utils/debounce.js";
+import { startTimer } from "./utils/timer.js";
+
 const themeToggleButton = document.querySelector(".controls__theme-toggle");
 const emptySection = document.querySelector(".tasks-section__empty");
 const addTaskButton = document.querySelector(".add-button");
 const container = document.querySelector(".container");
-const modalCloseButton = document.querySelector(".modal__buttons-cancel");
-const modalApplyButton = document.querySelector(".modal__buttons-apply");
 const modal = document.querySelector(".modal");
 const searchInput = document.querySelector(".controls__search");
 const tasksList = document.createElement("ul");
 const tasksSection = document.querySelector(".tasks-section");
 const selectFilter = document.querySelector(".controls__filter");
+
 tasksSection.appendChild(tasksList);
 tasksList.classList.add("tasks-section__list");
 
 const todoItems = [];
-let deletedTask = null; // Объявляем переменную deletedTask
-let remainingTime = 0; // Объявляем переменную remainingTime
-let timerInterval = null; // Объявляем переменную timerInterval
-let deletionTimeout = null; // Объявляем переменную deletionTimeout
+
+let deletedTask = null;
+let deletionTimeout = null;
 
 const themes = {
   light: {
@@ -32,6 +33,64 @@ const themes = {
     icon: themeIcons.dark,
   },
 };
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadTasksFromLocalStorage();
+  const selectedFilter = selectFilter.value;
+  filterTasks(selectedFilter);
+});
+
+function saveTasksToLocalStorage() {
+  localStorage.setItem("todoItems", JSON.stringify(todoItems));
+}
+
+function loadTasksFromLocalStorage() {
+  const storedTasks = localStorage.getItem("todoItems");
+  if (storedTasks) {
+    todoItems.push(...JSON.parse(storedTasks));
+    renderTasks();
+  }
+}
+
+function createTodoItem(todoItem) {
+  const taskElement = document.createElement("li");
+  taskElement.classList.add("tasks-section__list-item", "list-item");
+  taskElement.setAttribute("data-key", todoItem.id);
+
+  taskElement.innerHTML = `
+    <input id=${todoItem.id} type="checkbox" ${
+    todoItem.checked ? "checked" : ""
+  }/>
+    <label for="${todoItem.id}" class="list-item__checkbox"></label>
+    <input value="${
+      todoItem.taskText
+    }" type="text" class="list__item-text" readonly />
+    <div class="list-item__buttons">
+      <button class="edit-button">${taskIcons.editIcon}</button>
+      <button class="delete-button">${taskIcons.deleteIcon}</button>
+    </div>
+  `;
+
+  if (todoItem.checked) {
+    taskElement.classList.add("done");
+  }
+
+  return taskElement;
+}
+
+function renderTasks() {
+  tasksList.innerHTML = "";
+  todoItems.forEach((todoItem) => {
+    const taskElement = createTodoItem(todoItem);
+    tasksList.appendChild(taskElement);
+  });
+
+  const selectedFilter = selectFilter.value;
+  filterTasks(selectedFilter);
+
+  toggleTasksView();
+  updateTaskBorders();
+}
 
 selectFilter.addEventListener("change", (event) => {
   const selectedOption = event.target.value;
@@ -58,58 +117,6 @@ function filterTasks(filter) {
   updateTaskBorders();
 }
 
-function saveTasksToLocalStorage() {
-  localStorage.setItem("todoItems", JSON.stringify(todoItems));
-}
-
-function loadTasksFromLocalStorage() {
-  const storedTasks = localStorage.getItem("todoItems");
-  if (storedTasks) {
-    todoItems.push(...JSON.parse(storedTasks));
-    renderTasks();
-  }
-}
-
-function renderTasks() {
-  tasksList.innerHTML = "";
-  todoItems.forEach((todoItem) => {
-    const taskElement = document.createElement("li");
-    taskElement.classList.add("tasks-section__list-item", "list-item");
-    taskElement.setAttribute("data-key", todoItem.id);
-
-    taskElement.innerHTML = `
-      <input id=${todoItem.id} type="checkbox" ${
-      todoItem.checked ? "checked" : ""
-    }/>
-      <label for="${todoItem.id}" class="list-item__checkbox"></label>
-      <input value=${
-        todoItem.taskText
-      } type="text" class="list__item-text" readonly="true"/>
-      <div class="list-item__buttons">
-        <button class="edit-button">${taskIcons.editIcon}</button>
-        <button class="delete-button">${taskIcons.deleteIcon}</button>
-      </div>
-    `;
-
-    if (todoItem.checked) {
-      taskElement.classList.add("done");
-    }
-
-    tasksList.appendChild(taskElement);
-  });
-
-  const selectedFilter = selectFilter.value;
-  filterTasks(selectedFilter);
-
-  toggleTasksView();
-  updateTaskBorders();
-}
-function toggleTasksView() {
-  const isEmpty = tasksList.children.length === 0;
-  emptySection.style.display = isEmpty ? "flex" : "none";
-  tasksList.style.display = isEmpty ? "none" : "block";
-}
-
 function updateTaskBorders() {
   const visibleTasks = Array.from(tasksList.children).filter(
     (task) => task.style.display !== "none"
@@ -123,11 +130,11 @@ function updateTaskBorders() {
   });
 }
 
-// toggle theme (light or dark)
 themeToggleButton.addEventListener("click", () => {
   container.classList.toggle("dark");
   updateTheme();
 });
+
 function updateTheme() {
   const isDarkMode = container.classList.contains("dark");
   const theme = isDarkMode ? themes.dark : themes.light;
@@ -150,16 +157,11 @@ addTaskButton.addEventListener("click", () => {
   container.classList.add("modal-open");
   updateTaskBorders();
 });
-
-modalCloseButton.addEventListener("click", () => {
-  modal.style.display = "none";
-  container.classList.remove("modal-open");
-});
-
-modalApplyButton.addEventListener("click", () => {
+function addTaskToList() {
   const modalTaskInput = document.querySelector(".modal__input");
   const taskText = modalTaskInput.value.trim();
   if (!taskText) {
+    alert("Type something");
     return;
   }
   const todoItem = {
@@ -171,45 +173,78 @@ modalApplyButton.addEventListener("click", () => {
   saveTasksToLocalStorage();
   renderTasks();
   modal.style.display = "none";
-  container.classList.remove("modal-open");
+  closeModal();
+
   modalTaskInput.value = "";
+}
+function closeModal() {
+  modal.style.display = "none";
+  container.classList.remove("modal-open");
+}
+
+// delegation modal (close&apply buttons)
+modal.addEventListener("click", (event) => {
+  const target = event.target;
+  if (target.closest(".modal__buttons-apply")) {
+    addTaskToList();
+  }
+  if (target.closest(".modal__buttons-cancel")) {
+    closeModal();
+  }
+});
+const modalTaskInput = document.querySelector(".modal__input");
+modalTaskInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    addTaskToList();
+  }
 });
 
-searchInput.addEventListener("input", (e) => {
-  const searchInputValue = e.target.value.trim().toLowerCase();
+function handleSearchInput(event) {
+  const searchInputValue = event.target.value.trim().toLowerCase();
+  const selectedFilter = selectFilter.value;
   Array.from(tasksList.children).forEach((task) => {
-    const taskText = task.querySelector(".list__item-text").value.toLowerCase();
-    if (taskText.startsWith(searchInputValue)) {
+    const taskText = task
+      .querySelector(".list__item-text")
+      .value.trim()
+      .toLowerCase();
+
+    const isTaskCompleted = task.querySelector(
+      'input[type="checkbox"]'
+    ).checked;
+
+    const matchesSearch = taskText.startsWith(searchInputValue);
+    const matchesFilter =
+      selectedFilter === "All" ||
+      (selectedFilter === "Complete" && isTaskCompleted) ||
+      (selectedFilter === "Incomplete" && !isTaskCompleted);
+
+    if (matchesSearch && matchesFilter) {
       task.style.display = "flex";
     } else {
       task.style.display = "none";
     }
   });
+
   updateTaskBorders();
-});
+}
 
-function startTimer() {
-  const timerElement = document.querySelector(".undo-button .timer");
-  const timerCircle = document.querySelector(
-    ".undo-button .timer-circle circle"
-  );
+const debouncedHandleSearchInput = debounce(handleSearchInput, 300);
+searchInput.addEventListener("input", debouncedHandleSearchInput);
 
-  remainingTime = 3;
-  timerElement.textContent = remainingTime;
+function toggleTasksView() {
+  const isEmpty = tasksList.children.length === 0 || todoItems.length === 0;
+  emptySection.style.display = isEmpty ? "flex" : "none";
+  tasksList.style.display = isEmpty ? "none" : "block";
+}
 
-  timerCircle.style.animation = "none";
-  timerCircle.offsetHeight;
-  timerCircle.style.animation = null;
-
-  timerInterval = setInterval(() => {
-    remainingTime--;
-    timerElement.textContent = remainingTime;
-
-    if (remainingTime <= 0) {
-      clearInterval(timerInterval);
-      hideUndoButton();
+function setDeleteButtonsDisabled(isDisabled) {
+  const deleteButtons = document.querySelectorAll(".delete-button");
+  deleteButtons.forEach((button) => {
+    if (button !== deletedTask?.element?.querySelector(".delete-button")) {
+      button.disabled = isDisabled;
     }
-  }, 1000);
+  });
 }
 
 function deleteTask(id) {
@@ -219,13 +254,15 @@ function deleteTask(id) {
   taskElement.style.display = "none";
 
   deletedTask = {
-    id: id,
+    id,
     element: taskElement,
   };
 
   showUndoButton();
   startTimer();
   updateTaskBorders();
+  setDeleteButtonsDisabled(true);
+
   deletionTimeout = setTimeout(() => {
     if (deletedTask) {
       const index = todoItems.findIndex((item) => item.id === Number(id));
@@ -233,9 +270,12 @@ function deleteTask(id) {
         todoItems.splice(index, 1);
         saveTasksToLocalStorage();
       }
-
       deletedTask = null;
       hideUndoButton();
+      setDeleteButtonsDisabled(false);
+      if (todoItems.length === 0) {
+        toggleTasksView();
+      }
     }
   }, 3000);
 }
@@ -245,12 +285,9 @@ function undoDelete() {
     deletedTask.element.style.display = "flex";
 
     deletedTask = null;
-
     hideUndoButton();
-
-    if (deletionTimeout) {
-      clearTimeout(deletionTimeout);
-    }
+    if (deletionTimeout) clearTimeout(deletionTimeout);
+    setDeleteButtonsDisabled(false);
   }
 }
 
@@ -280,7 +317,6 @@ function completeTask(id) {
   if (taskElement) {
     taskElement.classList.toggle("done", todoItems[index].checked);
   }
-
   renderTasks();
 }
 
@@ -288,48 +324,59 @@ function editTask(id) {
   const taskElement = document.querySelector(`[data-key='${id}']`);
   if (!taskElement) return;
 
-  const taskElementInput = taskElement.querySelector(
-    'input[type="text"]:last-of-type'
-  );
+  const taskTextInput = taskElement.querySelector(".list__item-text");
   const editButton = taskElement.querySelector(".edit-button");
 
-  if (taskElementInput && editButton) {
-    editButton.innerHTML = "Save";
+  if (taskTextInput && editButton) {
+    if (taskTextInput.isEditing) {
+      saveChanges(taskTextInput, id, editButton);
+    } else {
+      taskTextInput.removeAttribute("readonly");
+      taskTextInput.focus();
+      taskTextInput.setSelectionRange(
+        taskTextInput.value.length,
+        taskTextInput.value.length
+      );
+      taskTextInput.isEditing = true;
+      editButton.innerHTML = "Save";
 
-    taskElementInput.removeAttribute("readonly");
-    taskElementInput.focus();
-    const length = taskElementInput.value.length;
-    taskElementInput.setSelectionRange(length, length);
-
-    const saveChanges = () => {
-      const newText = taskElementInput.value.trim();
-      if (newText) {
-        const index = todoItems.findIndex((item) => item.id === Number(id));
-        if (index !== -1) {
-          todoItems[index].taskText = newText;
-          saveTasksToLocalStorage();
+      const handleKeyPress = (e) => {
+        if (e.key === "Enter") {
+          saveChanges(taskTextInput, id, editButton);
         }
-      }
+      };
 
-      taskElementInput.setAttribute("readonly", true);
+      const handleSaveClick = () => {
+        saveChanges(taskTextInput, id, editButton);
+      };
 
-      editButton.innerHTML = taskIcons.editIcon;
+      taskTextInput.removeEventListener("keypress", handleKeyPress);
+      taskTextInput.removeEventListener("click", handleSaveClick);
 
-      updateTaskBorders();
-    };
-
-    taskElementInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        saveChanges();
-      }
-    });
-
-    editButton.addEventListener("click", saveChanges);
-
-    taskElementInput.addEventListener("blur", saveChanges);
+      taskTextInput.addEventListener("keypress", handleKeyPress);
+      taskTextInput.addEventListener("click", handleSaveClick);
+    }
   }
 }
 
+function saveChanges(taskTextInput, id, editButton) {
+  const newText = taskTextInput.value.trim();
+  if (newText) {
+    const index = todoItems.findIndex((item) => item.id === Number(id));
+    if (index !== -1) {
+      todoItems[index].taskText = newText;
+      saveTasksToLocalStorage();
+    }
+  }
+
+  taskTextInput.setAttribute("readonly", true);
+  taskTextInput.isEditing = false;
+  editButton.innerHTML = taskIcons.editIcon;
+  taskTextInput.blur();
+  updateTaskBorders();
+}
+
+// delegation task list (task items)
 tasksList.addEventListener("click", (event) => {
   event.preventDefault();
 
@@ -349,10 +396,4 @@ tasksList.addEventListener("click", (event) => {
     const todoItemId = editButton.closest(".list-item").dataset.key;
     editTask(todoItemId);
   }
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  loadTasksFromLocalStorage();
-  const selectedFilter = selectFilter.value;
-  filterTasks(selectedFilter);
 });

@@ -280,13 +280,10 @@ body {
   text-transform: uppercase;
 }
 
-.tasks-section__list-item .list-item__buttons {
-  opacity: 0;
+/* Кнопки всегда видны на маленьких экранах */
+.list-item__buttons {
+  margin-left: auto;
   transition: opacity 0.2s ease;
-}
-
-.tasks-section__list-item:hover .list-item__buttons {
-  opacity: 1;
 }
 
 .tasks-section__list-item {
@@ -304,8 +301,9 @@ body {
 }
 
 .list__item-text {
-  flex-grow: 1;
-  margin-right: 15px;
+  flex: 1;
+  border: none;
+  margin-right: 20px;
   border: 1px solid transparent;
   padding-left: 10px;
 }
@@ -341,12 +339,35 @@ body {
   display: none;
 }
 
-.edit-button:hover svg {
-  animation: changeFill 0.2s ease-in forwards;
+/* На больших экранах (ширина >= 1024px) */
+@media (min-width: 1024px) {
+  .list-item__buttons {
+    opacity: 0; /* Кнопки скрыты по умолчанию */
+  }
+
+  .tasks-section__list-item:hover .list-item__buttons {
+    opacity: 1; /* Кнопки видны при hover */
+  }
+
+  .edit-button:hover svg {
+    animation: changeFill 0.2s ease-in forwards;
+  }
+
+  .delete-button:hover svg path {
+    animation: changeStroke 0.2s ease-in forwards;
+  }
 }
 
-.delete-button:hover svg path {
-  animation: changeStroke 0.2s ease-in forwards;
+/* На маленьких экранах (ширина < 1024px) */
+@media (max-width: 1023px) {
+  .list-item__buttons {
+    opacity: 1; /* Кнопки всегда видны */
+  }
+}
+
+.delete-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .list-item__checkbox {
@@ -371,10 +392,6 @@ body {
 
 .list-item__checkbox:checked {
   background-color: var(--primary-color);
-}
-
-.list__item-text {
-  flex-grow: 1;
 }
 
 .done .list__item-text {
