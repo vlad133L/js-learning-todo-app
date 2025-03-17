@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 
+/* variables */
 :root {
   --primary-color: #6c63ff;
   --white: #f7f7f7;
@@ -29,6 +30,7 @@ body {
   text-align: center;
 }
 
+/* header section */
 .title {
   font-weight: 500;
   font-size: 26px;
@@ -141,6 +143,7 @@ body {
   background-color: var(--primary-color);
 }
 
+/* timer */
 .timer-container {
   position: relative;
   width: 30px;
@@ -183,6 +186,7 @@ body {
   }
 }
 
+/* modal */
 .modal {
   position: fixed;
   inset: 0;
@@ -258,6 +262,7 @@ body {
   background-color: var(--hover-primary-color);
 }
 
+/* main section (empty section (img and text) and tasks list section */
 .tasks-section__empty {
   display: flex;
   flex-direction: column;
@@ -280,7 +285,6 @@ body {
   text-transform: uppercase;
 }
 
-/* Кнопки всегда видны на маленьких экранах */
 .list-item__buttons {
   margin-left: auto;
   transition: opacity 0.2s ease;
@@ -300,7 +304,7 @@ body {
   border-bottom: none;
 }
 
-.list__item-text {
+.list-item__text {
   flex: 1;
   border: none;
   margin-right: 20px;
@@ -308,15 +312,15 @@ body {
   padding-left: 10px;
 }
 
-.list__item-text:focus {
+.list-item__text:focus {
   border: 1px solid var(--primary-color);
   border-radius: 6px;
 }
 
-.container.dark .real-checkbox:checked ~ .list__item-text {
+.container.dark .real-checkbox:checked ~ .list-item__text {
   color: rgba(255, 255, 255, 0.5);
 }
-
+/* hover effect on edit button */
 @keyframes changeFill {
   from {
     fill: #cdcdcd;
@@ -325,7 +329,7 @@ body {
     fill: var(--primary-color);
   }
 }
-
+/* hover effect on delete button */
 @keyframes changeStroke {
   from {
     stroke: #cdcdcd;
@@ -337,32 +341,6 @@ body {
 
 .tasks-section__list-item:has(.real-checkbox:checked) .list-item__buttons {
   display: none;
-}
-
-/* На больших экранах (ширина >= 1024px) */
-@media (min-width: 1024px) {
-  .list-item__buttons {
-    opacity: 0; /* Кнопки скрыты по умолчанию */
-  }
-
-  .tasks-section__list-item:hover .list-item__buttons {
-    opacity: 1; /* Кнопки видны при hover */
-  }
-
-  .edit-button:hover svg {
-    animation: changeFill 0.2s ease-in forwards;
-  }
-
-  .delete-button:hover svg path {
-    animation: changeStroke 0.2s ease-in forwards;
-  }
-}
-
-/* На маленьких экранах (ширина < 1024px) */
-@media (max-width: 1023px) {
-  .list-item__buttons {
-    opacity: 1; /* Кнопки всегда видны */
-  }
 }
 
 .delete-button:disabled {
@@ -389,12 +367,12 @@ body {
   color: var(--white);
   display: none;
 }
-
+/* styles for todo item if its done (checked) */
 .list-item__checkbox:checked {
   background-color: var(--primary-color);
 }
 
-.done .list__item-text {
+.done .list-item__text {
   text-decoration: line-through;
   color: #c3c1e5;
 }
@@ -409,4 +387,57 @@ body {
 
 input[type="checkbox"] {
   display: none;
+}
+
+/* Media queries */
+
+@media (min-width: 1024px) {
+  .list-item__buttons {
+    opacity: 0;
+  }
+
+  .tasks-section__list-item:hover .list-item__buttons {
+    opacity: 1;
+  }
+
+  .edit-button:hover svg {
+    animation: changeFill 0.2s ease-in forwards;
+  }
+
+  .delete-button:hover svg path {
+    animation: changeStroke 0.2s ease-in forwards;
+  }
+}
+
+@media (max-width: 510px) {
+  .modal__main {
+    width: 90%;
+  }
+  .controls {
+    flex-direction: column;
+  }
+  .controls__search {
+    width: 90%;
+  }
+  .controls__filter {
+    position: relative;
+    width: 90%;
+  }
+  .controls__theme-toggle {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+  }
+}
+
+@media (max-width: 350px) {
+  .list-item {
+    flex-direction: column;
+  }
+  .list-item__buttons {
+    margin: 0 auto;
+  }
+  .list-item__text {
+    margin: 5px 0;
+  }
 }

@@ -64,7 +64,7 @@ function createTodoItem(todoItem) {
     <label for="${todoItem.id}" class="list-item__checkbox"></label>
     <input value="${
       todoItem.taskText
-    }" type="text" class="list__item-text" readonly />
+    }" type="text" class="list-item__text" readonly />
     <div class="list-item__buttons">
       <button class="edit-button">${taskIcons.editIcon}</button>
       <button class="delete-button">${taskIcons.deleteIcon}</button>
@@ -205,7 +205,7 @@ function handleSearchInput(event) {
   const selectedFilter = selectFilter.value;
   Array.from(tasksList.children).forEach((task) => {
     const taskText = task
-      .querySelector(".list__item-text")
+      .querySelector(".list-item__text")
       .value.trim()
       .toLowerCase();
 
@@ -233,7 +233,7 @@ const debouncedHandleSearchInput = debounce(handleSearchInput, 300);
 searchInput.addEventListener("input", debouncedHandleSearchInput);
 
 function toggleTasksView() {
-  const isEmpty = tasksList.children.length === 0 || todoItems.length === 0;
+  const isEmpty = todoItems.length === 0;
   emptySection.style.display = isEmpty ? "flex" : "none";
   tasksList.style.display = isEmpty ? "none" : "block";
 }
@@ -324,7 +324,7 @@ function editTask(id) {
   const taskElement = document.querySelector(`[data-key='${id}']`);
   if (!taskElement) return;
 
-  const taskTextInput = taskElement.querySelector(".list__item-text");
+  const taskTextInput = taskElement.querySelector(".list-item__text");
   const editButton = taskElement.querySelector(".edit-button");
 
   if (taskTextInput && editButton) {
@@ -340,42 +340,29 @@ function editTask(id) {
       taskTextInput.isEditing = true;
       editButton.innerHTML = "Save";
 
-      const handleKeyPress = (e) => {
-        if (e.key === "Enter") {
-          saveChanges(taskTextInput, id, editButton);
-        }
-      };
-
       const handleSaveClick = () => {
         saveChanges(taskTextInput, id, editButton);
       };
-
-      taskTextInput.removeEventListener("keypress", handleKeyPress);
-      taskTextInput.removeEventListener("click", handleSaveClick);
-
-      taskTextInput.addEventListener("keypress", handleKeyPress);
-      taskTextInput.addEventListener("click", handleSaveClick);
+      editButton.addEventListener("click", handleSaveClick);
+      editButton.removeEventListener("click", handleSaveClick);
     }
   }
 }
 
 function saveChanges(taskTextInput, id, editButton) {
-  const newText = taskTextInput.value.trim();
-  if (newText) {
-    const index = todoItems.findIndex((item) => item.id === Number(id));
-    if (index !== -1) {
-      todoItems[index].taskText = newText;
-      saveTasksToLocalStorage();
-    }
+  const newText = taskTextInput.value.trim() || "Type something...";
+  const index = todoItems.findIndex((item) => item.id === Number(id));
+  if (index !== -1) {
+    todoItems[index].taskText = newText;
+    taskTextInput.value = newText;
+    saveTasksToLocalStorage();
   }
-
   taskTextInput.setAttribute("readonly", true);
   taskTextInput.isEditing = false;
   editButton.innerHTML = taskIcons.editIcon;
   taskTextInput.blur();
   updateTaskBorders();
 }
-
 // delegation task list (task items)
 tasksList.addEventListener("click", (event) => {
   event.preventDefault();
