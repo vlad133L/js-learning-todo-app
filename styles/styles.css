@@ -410,18 +410,16 @@ input[type="checkbox"] {
 }
 
 @media (max-width: 510px) {
-  .modal__main {
+  .modal__main,
+  .controls__search,
+  .controls__filter {
     width: 90%;
   }
   .controls {
     flex-direction: column;
   }
-  .controls__search {
-    width: 90%;
-  }
   .controls__filter {
     position: relative;
-    width: 90%;
   }
   .controls__theme-toggle {
     position: fixed;
