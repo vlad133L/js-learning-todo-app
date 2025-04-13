@@ -1,0 +1,50 @@
+@import "../base/variables";
+@media (min-width: 1024px) {
+  .list-item__buttons {
+    opacity: 0;
+  }
+
+  .tasks-section__list-item:hover .list-item__buttons {
+    opacity: 1;
+  }
+
+  .edit-button:hover svg {
+    animation: changeFill var(--transition-fast) forwards;
+  }
+
+  .delete-button:hover svg path {
+    animation: changeStroke var(--transition-fast) forwards;
+  }
+}
+
+@media (max-width: 510px) {
+  .modal__main,
+  .controls__search,
+  .controls__filter {
+    width: 90%;
+  }
+
+  .controls {
+    flex-direction: column;
+
+    &__theme-toggle {
+      position: fixed;
+      right: 20px;
+      top: 20px;
+    }
+  }
+}
+
+@media (max-width: 350px) {
+  .list-item {
+    flex-direction: column;
+
+    &__buttons {
+      margin: 0 auto;
+    }
+
+    &__text {
+      margin: 5px 0;
+    }
+  }
+}

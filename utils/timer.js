@@ -26,3 +26,7 @@ export function startTimer(callback, duration = 3) {
 
   return timerInterval;
 }
+
+//duration в const
+//логика добавления css класса вместо стилей
+// class для reset animation (попробовать реализовать через css)

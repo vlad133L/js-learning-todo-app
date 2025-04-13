@@ -1,0 +1,29 @@
+@import "./variables";
+@import "../components/timer";
+
+@keyframes countdown {
+  from {
+    stroke-dashoffset: 63;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes changeFill {
+  from {
+    fill: #cdcdcd;
+  }
+  to {
+    fill: var(--color-primary);
+  }
+}
+
+@keyframes changeStroke {
+  from {
+    stroke: #cdcdcd;
+  }
+  to {
+    stroke: red;
+  }
+}

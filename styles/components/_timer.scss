@@ -1,0 +1,33 @@
+@import "../base/variables";
+.timer-container {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .timer-circle {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    transform: rotate(-90deg);
+
+    circle {
+      animation: countdown 3s linear forwards;
+      stroke: var(--color-white);
+      stroke-width: 2;
+      fill: none;
+      stroke-dasharray: 63;
+      stroke-dashoffset: 63;
+    }
+  }
+
+  .timer {
+    position: absolute;
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--color-white);
+    z-index: 1;
+  }
+}

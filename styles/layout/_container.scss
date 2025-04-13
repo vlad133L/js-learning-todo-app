@@ -1,0 +1,11 @@
+@import "../base/variables";
+.container {
+  &.dark {
+    background-color: var(--color-dark);
+    color: var(--color-white);
+  }
+
+  &.modal-open {
+    background-color: rgba(37, 37, 37, 0.7);
+  }
+}

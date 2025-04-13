@@ -1,5 +1,5 @@
-import { themeIcons } from "./modules/themeIcons.js";
-import { taskIcons } from "./modules/taskIcons.js";
+import { themeIcons } from "./constants.js";
+import { taskIcons } from "./constants.js";
 import { debounce } from "./utils/debounce.js";
 import { startTimer } from "./utils/timer.js";
 
@@ -16,10 +16,10 @@ const selectFilter = document.querySelector(".controls__filter");
 tasksSection.appendChild(tasksList);
 tasksList.classList.add("tasks-section__list");
 
-const todoItems = [];
+const todoItems = []; // убрать, операции только с localStorage
 
 let deletedTask = null;
-let deletionTimeout = null;
+let deletionTimeout = null; // удалить (isDeleted флаг в localstorage)
 
 const themes = {
   light: {
@@ -40,10 +40,12 @@ document.addEventListener("DOMContentLoaded", () => {
   filterTasks(selectedFilter);
 });
 
+// создать класс localStorageService ()
+
 function saveTasksToLocalStorage() {
   localStorage.setItem("todoItems", JSON.stringify(todoItems));
 }
-
+// todoitems вынести в const
 function loadTasksFromLocalStorage() {
   const storedTasks = localStorage.getItem("todoItems");
   if (storedTasks) {
@@ -51,7 +53,9 @@ function loadTasksFromLocalStorage() {
     renderTasks();
   }
 }
-
+// json parse в localStorageService (json.parse в try catch)
+// class Todo (create,delete,edit)
+//class todo зависит от localstorage
 function createTodoItem(todoItem) {
   const taskElement = document.createElement("li");
   taskElement.classList.add("tasks-section__list-item", "list-item");
@@ -70,14 +74,14 @@ function createTodoItem(todoItem) {
       <button class="delete-button">${taskIcons.deleteIcon}</button>
     </div>
   `;
-
   if (todoItem.checked) {
     taskElement.classList.add("done");
   }
 
   return taskElement;
 }
-
+// попробовать минимизировать html css в JS
+// использовать ООП (разбить по файлам)
 function renderTasks() {
   tasksList.innerHTML = "";
   todoItems.forEach((todoItem) => {
@@ -144,6 +148,7 @@ function updateTheme() {
   themeToggleButton.innerHTML = theme.icon;
   searchInput.classList.toggle("dark", isDarkMode);
 }
+// минимизирoваоть css
 
 addTaskButton.addEventListener("click", () => {
   const isDarkMode = container.classList.contains("dark");
@@ -169,6 +174,26 @@ function addTaskToList() {
     checked: false,
     id: Date.now(),
   };
+
+  class TodoSerivce {
+    save(taskText, checked) {
+      const todoItem = new TodoItem(taskText, checked);
+
+      localStorageSevice.save();
+    }
+  }
+
+  class TodoItem {
+    #text = "";
+    #checked = false;
+    #id = null;
+    constructor(taskText, checked) {
+      this.text = taskText;
+      this.checked = checked;
+      this.id = Date.now(); // сделать через Math.random()
+    }
+  }
+  // отдельный класс для TodoItem
   todoItems.push(todoItem);
   saveTasksToLocalStorage();
   renderTasks();
@@ -218,7 +243,7 @@ function handleSearchInput(event) {
       selectedFilter === "All" ||
       (selectedFilter === "Complete" && isTaskCompleted) ||
       (selectedFilter === "Incomplete" && !isTaskCompleted);
-
+    // попробовать сделать ключами объекта (filterStatusEnum)
     if (matchesSearch && matchesFilter) {
       task.style.display = "flex";
     } else {
@@ -384,3 +409,7 @@ tasksList.addEventListener("click", (event) => {
     editTask(todoItemId);
   }
 });
+
+// class App {
+//   #todoService = new TodoService(new LocalStorageService());
+// }
