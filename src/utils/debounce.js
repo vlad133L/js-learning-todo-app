@@ -5,5 +5,3 @@ export function debounce(func, delay) {
     timeoutId = setTimeout(() => func.apply(this, args), delay);
   };
 }
-
-// очистить последний timeoutId
